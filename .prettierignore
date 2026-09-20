@@ -13,5 +13,7 @@ packages/shared/registration-prefixes.json
 packages/shared/registration-prefixes.ts
 packages/shared/generate-prefix-migration.ts
 
-# Generated, never hand edited or reformatted.
+# Generated, never hand edited or reformatted. Formatting these would break
+# the drift checks that compare the committed file to fresh generator output.
 supabase/migrations/0010_registration_prefixes_seed.sql
+packages/shared/tokens.ts

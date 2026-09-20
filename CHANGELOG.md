@@ -1,5 +1,54 @@
 # Change log
 
+## Phase S, Block 3, packages/shared, 2026-09-20
+
+Tokens, types, events and schemas. Suite is 453 tests, up from 160. Found one
+documentation defect in the frozen token table.
+
+- `tokens.ts` is generated from `docs/DESIGN.md` section 2.4 rather than typed,
+  and CI diffs the committed file against fresh generator output. Ruling D1
+  makes the document the authority, and `CLAUDE.md` section 7 records what
+  happens when a file is rebuilt from memory.
+- `contrast.ts` implements the WCAG relative luminance formula. `tokens.test.ts`
+  recomputes all 62 ratios printed in sections 2.1 and 2.2, checks every pairing
+  against its threshold, and encodes the two tertiary exceptions and the D2
+  border exemption so neither can quietly widen.
+- `types.ts` mirrors the Postgres enums and is checked against
+  `0002_enums.sql`, including a test that every enum the migration declares is
+  covered, so none can be forgotten. Queue labels are asserted sentence case,
+  never promising background upload, and never saying delivered.
+- `events.ts` is the only analytics path. The taxonomy is exhaustive, an
+  unknown name throws per ruling A2, and redaction runs in the wrapper rather
+  than at call sites. It strips prohibited keys at any depth and drops any URL
+  value whatever the key is called.
+- `schemas.ts` covers the section 5.1 payloads. `create_submission` and the
+  owner projection are `.strict()`, so a client-supplied approval field or a
+  leaked `approved_by` fails rather than passing through.
+- Registration validator tests, the Phase S equivalence task. Hyphenated and
+  stripped forms resolve identically, including for every unpatterned row
+  generated from the JSON itself. Unicode dashes are covered, because a
+  registration pasted from a PDF carries U+2011 rather than U+002D.
+
+Found and not fixed, needs a CKC decision:
+
+- **`docs/DESIGN.md` section 2.1, dark `error` row.** It prints 6.86, 6.22 and
+  5.54 against `bg`, `surface1` and `surface2`. The frozen hex `#EE8580` gives
+  7.48, 6.77 and 6.02. Only the `surface3` cell is right.
+- The hex is safe and nothing in code changes. All four pairings clear 4.5 to 1
+  with margin, and the printed values understate rather than overstate.
+- Provably wrong rather than rounding. `ratio_on_bg` divided by `ratio_on_S`
+  depends only on the surfaces, giving 1.1048, 1.2411 and 1.4823. Every other
+  row in both tables reproduces those. The `error` row implies 1.1029, 1.2383
+  and 1.3611, so its four cells cannot describe one colour. It reads like a
+  partial update after the hex changed.
+- Recorded rather than corrected: an agent may not edit `docs/` without an
+  approved revision, AGENTS.md section 9.4.
+
+Added `zod`, a pure-JS dependency inside the section 3 latitude.
+
+Phase S exit gates remain 0 of 7. None of these are gates.
+
+
 ## Phase S, Supabase unparked and migrations verified, 2026-09-20
 
 Applied the migration set to a real database for the first time. Three things

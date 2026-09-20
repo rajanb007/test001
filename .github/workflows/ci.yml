@@ -40,6 +40,13 @@ jobs:
       - name: Registration prefix drift
         run: pnpm run prefixes:check
 
+      - name: Design token drift
+        # tokens.ts is generated from docs/DESIGN.md section 2.4, ruling D1.
+        # A hand edit to the hex values fails here.
+        run: |
+          pnpm run tokens:generate > /tmp/tokens.generated.ts
+          diff -u packages/shared/tokens.ts /tmp/tokens.generated.ts
+
       - name: Tests
         run: pnpm run test
 
