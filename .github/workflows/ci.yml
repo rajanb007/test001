@@ -1,0 +1,52 @@
+# PlaneSpotter CI. Author CKC. Version 0.1.0.
+# Phase S gate work runs against real services and is not represented here.
+# This workflow proves the repo is internally consistent, nothing more.
+
+name: ci
+
+on:
+  push:
+    branches: [main, 'phase-*']
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Format
+        run: pnpm run format
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Registration prefix drift
+        run: pnpm run prefixes:check
+
+      - name: Tests
+        run: pnpm run test
+
+      - name: No committed env files
+        run: |
+          if git ls-files --error-unmatch '.env' '.env.*' 2>/dev/null | grep -v '.env.example'; then
+            echo "A .env file is tracked. AGENTS.md section 4 forbids it."
+            exit 1
+          fi
+          echo "No tracked .env files."

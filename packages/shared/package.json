@@ -1,0 +1,14 @@
+{
+  "name": "@planespotter/shared",
+  "version": "0.1.0",
+  "private": true,
+  "author": "CKC",
+  "description": "Tokens, types, events and zod schemas shared by mobile and web. BuildPack section 2.1",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./registration-prefixes": "./registration-prefixes.ts"
+  }
+}

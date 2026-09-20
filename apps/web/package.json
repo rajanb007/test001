@@ -1,0 +1,8 @@
+{
+  "name": "@planespotter/web",
+  "version": "0.1.0",
+  "private": true,
+  "author": "CKC",
+  "description": "Next.js App Router, public pages, share render, admin console",
+  "type": "module"
+}

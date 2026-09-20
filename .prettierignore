@@ -1,0 +1,17 @@
+dist/
+node_modules/
+.expo/
+.next/
+pnpm-lock.yaml
+docs/
+CHANGELOG.md
+CLAUDE.md
+AGENTS.md
+# Registration assets are CKC-authored and must stay byte identical.
+# docs/VALIDATION.md package 2.6 check: "Seven background files byte identical".
+packages/shared/registration-prefixes.json
+packages/shared/registration-prefixes.ts
+packages/shared/generate-prefix-migration.ts
+
+# Generated, never hand edited or reformatted.
+supabase/migrations/0010_registration_prefixes_seed.sql

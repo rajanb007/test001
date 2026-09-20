@@ -1,0 +1,37 @@
+{
+  "name": "planespotter",
+  "version": "0.1.0",
+  "private": true,
+  "author": "CKC",
+  "description": "PlaneSpotter monorepo. Phase S spike, see docs/PlaneSpotterBuildPack-v1.8.md section 9",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --build --force",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prefixes:generate": "tsx packages/shared/generate-prefix-migration.ts",
+    "prefixes:check": "tsx scripts/check-prefix-drift.ts",
+    "verify": "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run prefixes:check && pnpm run test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^22.19.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
+    "vitest": "^3.2.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "@planespotter/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "author": "CKC",
+  "description": "Expo app, expo-router. NativeTabs locked to the JS tabs fallback until the Phase S gate 4 spike passes",
+  "type": "module"
+}
