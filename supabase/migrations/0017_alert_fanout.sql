@@ -135,6 +135,12 @@ begin
   -- The target must exist. follows.target_id is text, uuid for airframes and
   -- ICAO for airports, constrained here rather than by a foreign key.
   if p_target_type = 'airframe' then
+    -- The cast is checked first. An airframe target that is not a uuid would
+    -- otherwise raise 22P02 out of the cast itself, so a client typo returns
+    -- a raw parse error instead of the documented "no such airframe".
+    if p_target_id !~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' then
+      raise exception 'no such airframe: %', p_target_id using errcode = 'P0002';
+    end if;
     if not exists (select 1 from public.airframes where id = p_target_id::uuid) then
       raise exception 'no such airframe: %', p_target_id using errcode = 'P0002';
     end if;

@@ -1,5 +1,72 @@
 # Change log
 
+## Phase S, code review of Blocks 1 to 5, 2026-09-20
+
+Ten defects found and fixed, each with a regression test that fails without
+the fix. Suite is 621 tests, 183 of them live, up from 588.
+
+Correctness, ordered by how much damage each would have done:
+
+- **Tier 3 could never publish.** `publish_resolve` treated anything but
+  `matched` as a failure, so `stub_pending` sent the submission to
+  `awaiting_identification`. The first sighting of any registration nobody had
+  photographed yet was unpublishable, which is the whole of R5 tier 3 broken.
+  Only `ambiguous` and `invalid` are non-publications, SPEC section 3.4.
+- **Approval gated only the first claim.** `publish_claim` checked the
+  approved revision for `waiting_authorization` alone, so a job already at
+  `resolved` was re-claimed after a rejection and copied derivatives into the
+  public bucket before the commit refused. Invariant 4 says unapproved
+  derivatives never reach the public bucket, and "at commit" was too late.
+- **The service-role guard was a no-op.** `app_require_service` fell back to
+  `current_user`, which inside a `SECURITY DEFINER` function is the function
+  owner, so the check passed unconditionally in every service-only RPC. The
+  revokes still made them unreachable, so nothing was exposed, but the defence
+  in depth BuildPack section 5.1 requires was absent and one mistaken grant
+  would have removed the only protection. Now `auth.role()` plus
+  `session_user`; `current_user` is documented as unusable here. Verified on
+  this stack: an anon REST call reports `current_user=postgres`,
+  `session_user=authenticator`, `auth.role()=anon`.
+- **A crash could strand an alert forever.** `materialize_deliveries` returned
+  only rows it had just inserted, so a worker that died between materialising
+  and claiming left the delivery and its event at `pending` with nothing to
+  pick them up. It now returns every pending delivery of an in-flight event,
+  oldest first.
+- **A sighting could publish with null derivative paths.** The media stamp in
+  `publish_commit` was an unfiltered update that silently matched nothing when
+  no media row existed. It now raises with the other guards, before any write.
+- **An all-failed event stayed pending forever.** `record_delivery_error` and
+  `fail_delivery_ticket_lost` never reconciled, so the event was rescanned on
+  every tick instead of becoming `skipped`, section 6.2 step 6.
+- **Redaction skipped arrays.** `redact` treated an array as a leaf, so
+  forbidden keys inside arrays of objects and URLs inside arrays of strings
+  reached analytics. Invariant 9 and R13.
+- **The timestamp schema rejected every real response.** `utcTimestampSchema`
+  required the `Z` spelling, and PostgreSQL renders a timestamptz inside
+  `jsonb_build_object` as `+00:00`, so the owner projection never parsed. Both
+  zero-offset spellings are accepted now, a non-zero offset still is not.
+- **The uuid schema was stricter than the uuid column.** `z.string().uuid()`
+  enforces the RFC 4122 version and variant nibbles; the column does not, so
+  the schema rejected ids Postgres stores and returns. Found by running a real
+  `create_submission` response through `ownerSubmissionSchema`, which nothing
+  had ever done.
+- `toggle_follow` cast a client string to uuid before checking it, so a typo
+  raised a raw 22P02 instead of the documented "no such airframe".
+
+Known and deliberately not fixed:
+
+- There is no terminal failure path. A job that cannot commit is re-claimed at
+  every lease expiry rather than moving to `failed`. A correct fix needs the
+  `cleanup` stage with nonce rotation and manifest retention, which BuildPack
+  section 5.5 places in Phase 0. The two fixes above close both loops actually
+  observed, so nothing spins today.
+
+Method note: every fix has a test that fails without it, and the three most
+subtle were mutation tested by restoring the defect and confirming the suite
+goes red. One review claim was checked and rejected: the CI action pins were
+said to look ahead of what exists, and they resolve fine and have passed six
+runs.
+
+
 ## Phase S, Block 5, storage and the push chain, 2026-09-20
 
 Real storage buckets, the real storage adapter, and the alert fanout from the

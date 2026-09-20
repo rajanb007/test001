@@ -109,11 +109,18 @@ grant execute on function public.publish_submission(uuid) to service_role;
 -- A state check is not a lock, CLAUDE.md section 7. This is a single atomic
 -- update returning the row, or nothing.
 --
--- waiting_authorization is claimable only when the submission carries approval
--- for its current revision. failed is never claimable. Every other runnable
--- stage is claimable when its lease is absent or expired, which is what makes
--- crash recovery work: a killed worker's lease expires and the next runner
--- picks the job up at the stage it reached.
+-- A job is claimable only while the submission carries approval for its
+-- current revision, BuildPack section 5.5 and the publish-runner row in the
+-- section 5.2 Edge Function table: "only runnable stages claimed, resolved,
+-- copied, verified with matching approved revision and an available lease are
+-- claimed". That applies to every stage, not only to waiting_authorization. Rejection and cancellation clear approval, so a
+-- moderator's decision stops the worker before it copies anything else into
+-- the public bucket rather than only at the final commit, invariant 4.
+--
+-- failed is never claimable. A runnable stage is otherwise claimable when its
+-- lease is absent or expired, which is what makes crash recovery work: a
+-- killed worker's lease expires and the next runner picks the job up at the
+-- stage it reached.
 create or replace function public.publish_claim(p_lease_seconds int default 300)
 returns jsonb
 language plpgsql
@@ -138,15 +145,15 @@ begin
     select j2.id
     from public.publish_jobs j2
     join public.submissions s2 on s2.id = j2.submission_id
-    where (
+    where s2.approved_revision is not null
+      and s2.approved_revision = s2.content_revision
+      and s2.approved_at is not null
+      and (
             j2.stage = 'waiting_authorization'
-            and s2.approved_revision is not null
-            and s2.approved_revision = s2.content_revision
-            and s2.approved_at is not null
-          )
-       or (
-            j2.stage in ('claimed', 'resolved', 'copied', 'verified')
-            and (j2.lease_until is null or j2.lease_until < now())
+         or (
+              j2.stage in ('claimed', 'resolved', 'copied', 'verified')
+              and (j2.lease_until is null or j2.lease_until < now())
+            )
           )
     order by j2.created_at
     for update of j2 skip locked
@@ -201,7 +208,12 @@ begin
   select * into v_resolved
   from public.resolve_airframe(v_sub.registration_text, v_sub.taken_at, v_sub.id);
 
-  if v_resolved.outcome <> 'matched' then
+  -- A stub is a resolved identity, not a failure. Tier 3 creates the airframe
+  -- and its current registration row and returns both, R5 and SPEC section
+  -- 3.4, so the first sighting of an unknown registration publishes against
+  -- that stub. Only ambiguous and invalid are non-publications, and SPEC
+  -- section 3.4 names exactly those two.
+  if v_resolved.outcome not in ('matched', 'stub_enriched', 'stub_pending') then
     -- Not a publication. Route the submission per SPEC section 3.3 and park
     -- the job: ambiguous quarantines, invalid needs a registration.
     perform public.app_transition_submission(
@@ -227,7 +239,7 @@ begin
   where id = p_job_id;
 
   return jsonb_build_object(
-    'outcome', 'matched',
+    'outcome', v_resolved.outcome,
     'stage', 'resolved',
     'airframe_id', v_resolved.airframe_id,
     'registration_id', v_resolved.registration_id,
@@ -352,6 +364,15 @@ begin
      or v_sub.approved_revision <> v_sub.content_revision
      or v_job.submission_revision <> v_sub.content_revision then
     raise exception 'approval does not cover the current revision of %', v_sub.id
+      using errcode = '55000';
+  end if;
+
+  -- A sighting without its media row would reach the feed with null feed,
+  -- detail and share paths, because the stamp further down is an unfiltered
+  -- update that silently matches nothing. Checked with the other guards,
+  -- before anything is written, invariant 4.
+  if not exists (select 1 from public.media m where m.submission_id = v_sub.id) then
+    raise exception 'submission % has no media row, nothing to stamp', v_sub.id
       using errcode = '55000';
   end if;
 

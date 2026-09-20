@@ -10,12 +10,23 @@
 
 -- Service-role guard, BuildPack section 5.1.
 --
--- Checks the JWT claim first, which is what PostgREST sets, and falls back to
--- the database role, which is what PostgREST actually switches to and what a
--- direct connection uses. postgres and supabase_admin are listed because they
--- are already superuser-equivalent on this platform: naming them grants
--- nothing a superuser could not already do, and it lets the automated tests
--- exercise these paths without a JWT.
+-- The JWT claim is the real check. PostgREST puts the request role there and
+-- connects as `authenticator` for every request, anon and service alike, so
+-- the connected role cannot distinguish them.
+--
+-- `current_user` must never be used here. Inside a SECURITY DEFINER function
+-- it is the function owner, so a guard built on it passes unconditionally.
+-- Verified on this stack: an anon REST call reports current_user=postgres,
+-- session_user=authenticator, auth.role()=anon. An earlier version of this
+-- function checked current_user and was therefore a no-op in every
+-- service-only RPC. The grants still held, so nothing was reachable, but the
+-- defence in depth the BuildPack asks for was not there.
+--
+-- `session_user` is not rewritten by SECURITY DEFINER, so it still identifies
+-- a direct connection. postgres and supabase_admin are listed because they are
+-- superuser-equivalent on this platform: naming them grants nothing they could
+-- not already do, and it lets migrations and the automated tests exercise
+-- these paths without minting a JWT.
 create or replace function public.app_require_service()
 returns void
 language plpgsql
@@ -27,7 +38,7 @@ begin
   if coalesce(auth.role(), '') = 'service_role' then
     return;
   end if;
-  if current_user in ('service_role', 'postgres', 'supabase_admin') then
+  if session_user in ('postgres', 'supabase_admin') then
     return;
   end if;
   raise exception 'permission denied: service role required'

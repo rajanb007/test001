@@ -111,19 +111,37 @@ export type EventProperties = Record<string, unknown>;
  * an object key reaching analytics before then would leak it. Values that look
  * like a URL are dropped whatever the key is called, because a private media
  * URL under an innocent name is the same leak.
+ *
+ * Arrays are walked too. An array is a container, not a leaf: a list of
+ * objects carries property keys and a list of strings carries URLs, so
+ * skipping them would leave the depth promise above untrue.
  */
 export function redact<T extends EventProperties>(properties: T): EventProperties {
   const clean: EventProperties = {};
   for (const [key, value] of Object.entries(properties)) {
     if (isForbiddenKey(key)) continue;
-    if (typeof value === 'string' && /^https?:\/\//i.test(value)) continue;
-    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      clean[key] = redact(value as EventProperties);
-      continue;
-    }
-    clean[key] = value;
+    const cleaned = redactValue(value);
+    if (cleaned === DROPPED) continue;
+    clean[key] = cleaned;
   }
   return clean;
+}
+
+/** Sentinel for a value the redactor removes rather than rewrites. */
+const DROPPED = Symbol('dropped');
+
+/** Redacts one value, at any depth, inside or outside an array. */
+function redactValue(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return /^https?:\/\//i.test(value) ? DROPPED : value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(redactValue).filter((entry) => entry !== DROPPED);
+  }
+  if (value !== null && typeof value === 'object') {
+    return redact(value as EventProperties);
+  }
+  return value;
 }
 
 /** Envelope fields every event carries, BuildPack section 8.1. */

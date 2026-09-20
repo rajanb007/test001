@@ -16,12 +16,37 @@ export const handleSchema = z
   .string()
   .regex(/^[a-z0-9][a-z0-9_-]{2,29}$/, 'Handles are 3 to 30 characters, lowercase');
 
-export const uuidSchema = z.string().uuid();
+/**
+ * A uuid as PostgreSQL defines one: 32 hex digits in 8-4-4-4-12 form.
+ *
+ * Deliberately looser than `z.string().uuid()`, which enforces the RFC 4122
+ * version and variant nibbles. The `uuid` column does not, so the strict form
+ * rejects values the database accepts, stores and hands back. A schema that
+ * refuses its own system's data is worse than a slightly permissive one, and
+ * clients generate v4 through `crypto.randomUUID()` either way.
+ */
+export const uuidSchema = z
+  .string()
+  .regex(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    'Expected a uuid in 8-4-4-4-12 form',
+  );
 
-/** UTC ISO 8601. A local-offset timestamp is rejected rather than coerced. */
+/**
+ * UTC ISO 8601. A local-offset timestamp is rejected rather than coerced.
+ *
+ * Both spellings of zero offset are accepted, because both cross the wire.
+ * A client sends `Z`, and PostgreSQL renders a timestamptz inside
+ * jsonb_build_object as `+00:00`, so an RPC projection such as
+ * app_owner_submission_json never carries the `Z` form.
+ */
 export const utcTimestampSchema = z
   .string()
-  .datetime({ offset: false })
+  .datetime({ offset: true })
+  .refine(
+    (value) => /(?:Z|[+-]00:00)$/i.test(value),
+    'Timestamps cross the wire in UTC, section 5.4',
+  )
   .describe('UTC ISO 8601, section 5.4');
 
 /** ICAO airport code. Four letters, uppercase. */

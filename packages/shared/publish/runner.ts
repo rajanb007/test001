@@ -74,6 +74,16 @@ export type RunOutcome = {
 
 const VARIANTS = ['feed', 'detail', 'share'] as const;
 
+/**
+ * Resolution outcomes that carry a usable airframe identity, R5.
+ *
+ * A stub is a resolved identity, not a failure: tier 3 creates the airframe
+ * and its current registration row and hands both back, so the first sighting
+ * of a registration nobody has photographed yet publishes against that stub.
+ * Only ambiguous and invalid are non-publications.
+ */
+const PUBLISHABLE_OUTCOMES: readonly string[] = ['matched', 'stub_enriched', 'stub_pending'];
+
 const defaultPendingKey = (submissionId: string, variant: string): string =>
   `pending/${submissionId}/${variant}.jpg`;
 
@@ -98,7 +108,7 @@ export async function runOnce(
 
   if (stage === 'claimed') {
     const resolved = await db.resolve(job.job_id, job.lease_token);
-    if (resolved.outcome !== 'matched') {
+    if (!PUBLISHABLE_OUTCOMES.includes(resolved.outcome)) {
       // Ambiguous quarantines and invalid needs a registration. Neither is a
       // publication, and resolve already routed the submission.
       return {
