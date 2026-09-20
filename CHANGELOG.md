@@ -1,5 +1,87 @@
 # Change log
 
+## Phase S, Block 4, write path and publication, 2026-09-20
+
+`create_submission`, the guarded transition helper, `advance_submission`,
+`resolve_airframe` with `taken_at`, and the happy-path publication stage
+machine. Suite is 552 tests, 133 of them live, up from 472.
+
+**Gate 2 identity half and gate 7 now pass against a real database.** Neither
+is a closed exit gate yet, see below.
+
+- Migrations 0011 to 0015. The private transition helper is the only state
+  mutator, invariant 10: a disallowed transition and a repeat of the current
+  state are both no-ops that write no audit row, so retries cannot duplicate
+  one. The SPEC section 3.3 table is encoded once, in
+  `app_transition_allowed`.
+- `create_submission` is idempotent on `(user_id, client_submission_id)`,
+  invariant 1. A retry returns the existing row and writes no second audit
+  row. Only the six documented payload fields are read, so a client-supplied
+  `state`, `review_required` or approval field is ignored rather than copied.
+  `review_required` comes from server trust.
+- `resolve_airframe` resolves by `taken_at` against validity ranges, never by
+  the current holder. The reassignment fixture resolves a pre-reassignment
+  date to the old airframe and a post-reassignment date to the new one, and an
+  overlapping range quarantines with zero writes to existing airframe rows.
+- The publication stage machine follows BuildPack section 5.5. The key
+  manifest is committed before the first copy, keys derive from the job nonce
+  so a recopy after a crash overwrites rather than creating a second set, and
+  the sighting is inserted in one SQL transaction after the objects are
+  verified. Claiming is a single atomic update returning the row, never a
+  state check.
+- The publish-runner lives in `packages/shared/publish/runner.ts` behind a
+  storage port. Block 4 drives it against a fake that counts writes per key;
+  Block 5 swaps in Supabase Storage without touching the runner.
+- Cross-language validator parity test. The SQL and TypeScript validators are
+  two implementations of one contract, so they are run over a 463 case corpus
+  and asserted to agree on normalisation, validity, prefix and country. The
+  check was mutation tested: breaking the SQL validator fails it.
+- The Phase S fixture harness is confined and audited.
+  `tests/policy/phase-s-harness.test.ts` asserts every fixture function
+  carries the `app_fixture_` prefix, lives only in migration 0015, is revoked
+  from clients, checks the service role at runtime, and tags its audit row
+  `fixture: true`.
+
+Two of my own mistakes, both caught by tests rather than review:
+
+- Live test files ran in parallel against one shared database and wiped each
+  other's fixtures. Every file passed alone and the suite failed together.
+  Fixed with `fileParallelism: false` and a comment saying why.
+- A Block 2 REST test asserted the users table was empty. That was an
+  assumption about fixture data, not part of the grant contract it was
+  testing, and it broke as soon as another suite created a user. Rewritten to
+  assert permitted versus denied, plus a new case that checks a real row
+  exposes only the six granted columns.
+
+Gates, stated precisely:
+
+- **Gate 2** identity half and concurrency half both pass. Eight racing
+  resolutions of one new registration produce exactly one airframe with no
+  orphans. The gate also requires this on the full Phase 0 pipeline, so it is
+  not signed off.
+- **Gate 7** passes against the fake storage port: kill after copied and
+  before committed yields exactly one sighting, three distinct public objects
+  and one publish audit action; kill after committed returns the existing
+  sighting and writes nothing. **It is not closed.** Gate 7 is about real
+  objects in a real bucket, and that is Block 5.
+- Gates 1, 3, 4, 5 and 6 need hardware, a push chain, a benchmark and a
+  cohort. Phase S exit gates remain 0 of 7 passed.
+
+Open for CKC, new this block:
+
+- `resolve_airframe` takes an optional third argument, `p_submission_id`. The
+  documented two-argument signature still works. It exists because SPEC
+  section 3.4 requires the ambiguous branch to write `import_conflicts` "with
+  submission_id", which two arguments cannot supply.
+- SPEC section 3.4 does not say what happens when registration history exists
+  but `taken_at` falls in a gap or after every `valid_to`. Decision priority
+  puts data integrity above speed, so it quarantines rather than guessing a
+  holder. Confirm or rule otherwise.
+- Tier 2, the OpenSky lookup, is unreachable in Phase S because
+  `aircraft_source_records` is a Phase 0 table. `stub_enriched` is therefore
+  never returned yet, by design rather than omission.
+
+
 ## Phase S, CI parity fix, 2026-09-20
 
 The Block 3 push turned CI red. Root cause and fix recorded because the class

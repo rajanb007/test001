@@ -51,12 +51,33 @@ live('users public projection over REST', () => {
     expect(isDenied(await getAsAnon('users?limit=1'))).toBe(true);
   });
 
-  it('the six public columns are permitted and return empty, not denied', async () => {
+  it('the six public columns are permitted, not denied', async () => {
+    // Asserts permitted versus denied, which is the contract. It deliberately
+    // does not assert an empty result: the earlier version did, and broke as
+    // soon as another test suite created a user. Emptiness is a property of
+    // the fixture data, not of the grant.
     const result = await getAsAnon(
       'users?select=id,handle,display_name,avatar_url,trust_tier,home_airport&limit=1',
     );
     expect(result.status).toBe(200);
-    expect(JSON.parse(result.body)).toEqual([]);
+    expect(Array.isArray(JSON.parse(result.body))).toBe(true);
+  });
+
+  it('exposes only the six granted columns on a real row', async () => {
+    const result = await getAsAnon(
+      'users?select=id,handle,display_name,avatar_url,trust_tier,home_airport&limit=1',
+    );
+    const rows = JSON.parse(result.body) as Array<Record<string, unknown>>;
+    for (const row of rows) {
+      expect(Object.keys(row).sort()).toEqual([
+        'avatar_url',
+        'display_name',
+        'handle',
+        'home_airport',
+        'id',
+        'trust_tier',
+      ]);
+    }
   });
 
   it.each(['strike_count', 'anonymized_at'])('asking for %s is denied', async (column) => {

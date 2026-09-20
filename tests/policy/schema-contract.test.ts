@@ -34,6 +34,11 @@ describe('migration file set', () => {
       '0008_rls.sql',
       '0009_grants.sql',
       '0010_registration_prefixes_seed.sql',
+      '0011_submission_transitions.sql',
+      '0012_rpc_create_submission.sql',
+      '0013_rpc_resolve_airframe.sql',
+      '0014_rpc_publish_submission.sql',
+      '0015_phase_s_fixture_harness.sql',
     ]);
   });
 });

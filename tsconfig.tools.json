@@ -12,5 +12,6 @@
     "vitest.config.ts",
     "eslint.config.mjs",
     "packages/shared/registration-prefixes.json"
-  ]
+  ],
+  "references": [{ "path": "./packages/shared" }]
 }

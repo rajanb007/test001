@@ -36,16 +36,36 @@ doc revision so the exception is documented rather than looking like a breach.
 
 Append only once applied to the shared project. Fix forward.
 
+## The Phase S fixture harness
+
+`0015` supplies approval for the happy path so publication can run before
+`authorize_submission` exists. BuildPack section 9 allows this and requires
+that it is never exposed to clients and never shipped.
+
+Four things keep it honest, all asserted by `tests/policy/phase-s-harness.test.ts`:
+every function carries the `app_fixture_` prefix so one grep finds them at
+Phase 0, they live only in that migration, they are revoked from `anon` and
+`authenticated` and check the service role at runtime, and the audit row they
+write is tagged `fixture: true` so an approval that came from the harness stays
+distinguishable from a real one forever.
+
+**Phase 0 deletes this file** and adds `authorize_submission`.
+
 ## Not here yet
 
-- No triggers migration. `airframes.updated_at` and `submissions.updated_at`
-  have defaults but nothing maintains them on update, and BuildPack section 3
-  specifies no trigger. Adding one is a schema change beyond section 3, so it
-  needs a CKC ruling. Open question, see `CHANGELOG.md`.
+- No triggers migration. `airframes.updated_at` has a default but nothing
+  maintains it on update. Withdrawn as a blocking question for `submissions`
+  and `publish_jobs`, whose RPCs set it explicitly. `airframes` is written in
+  bulk by Phase 0 importers and is decided there.
 - No `published_sightings` view, no `app_reader` role, no `is_suppressed`.
   BuildPack section 4 structural rules 1 and 5 place them in Phase 0.
-- No RPCs. `create_submission`, `advance_submission`, `resolve_airframe` and
-  `publish_submission` are Phase S Block 4.
+- No `authorize_submission`, no manifest cleanup, no adversarial race handling.
+  BuildPack section 9 places all three in Phase 0, gates 12 to 14. The stage
+  machine in `0014` is written to be extended there, not replaced.
+- No `update_submission` or `cancel_submission`. R11 resubmission is not in the
+  Phase S task list, so the reopen path does not exist yet.
+- No `get_my_submissions`. The owner projection exists as
+  `app_owner_submission_json` and the RPC that wraps it is Phase 0.
 - No Edge Functions. `process-media` lands in Block 5 and is scaffolded as an
   Edge Function; the worker fallback stays open until the gate 5 benchmark.
 
