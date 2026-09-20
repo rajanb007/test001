@@ -45,14 +45,20 @@ Conflict order. BuildPack, then MVP v1.3.2 on scope, then DESIGN.md on visuals, 
 
 | Item | State |
 |---|---|
-| Phase | Pre Phase S. Nothing built. Monorepo not scaffolded |
+| Phase | Phase S, Blocks 1 and 2 of 6 done. Monorepo scaffolded, schema subset written |
 | Current doc set | BuildPack v1.8, MVP v1.3.2, DesignSpec v1.0, repo doc set v2.5; corrections requested by user on 2026-09-19 |
 | Pending doc revision | None for the requested correction set. Static package checks recorded in docs/VALIDATION.md; implementation and phase gates remain unpassed |
 | Token freeze | Frozen at DESIGN.md v1.0, ruling D1 |
 | Phase S exit gates | 0 of 7 passed; happy path plus crash recovery. Authorization, manifest cleanup and full fencing belong to Phase 0 |
+| Repo | pnpm workspaces, apps/mobile and apps/web scaffolded as empty manifests, packages/shared holds the registration validator only. CI runs format, lint, typecheck, prefix drift and tests |
+| Migrations | 0001 to 0010 written for the 14 Phase S tables plus airports. Split by concern, RLS enabled on all 15, grants match BuildPack section 4. Never applied to any database |
+| Verification | 95 static tests read the SQL, none execute it. Live-stack and REST negative tests skip without DATABASE_URL. Nothing is proven against Postgres |
+| Supabase | Parked by CKC on 2026-09-20. No project provisioned |
+| Branches | main, phase-s, feature branches off phase-s per AGENTS.md section 6. Default branch and protection not yet set in GitHub settings |
 | Cohort recruiting | Not started, outreach draft not written |
 | Hub airports | Archetypes defined, real airports not picked |
-| NativeTabs | Undecided, spike pending |
+| NativeTabs | Undecided, spike pending. Scaffold defaults to the JS tabs fallback until gate 4 passes |
+| Processing platform | Undecided, gate 5 pending. process-media scaffolds as an Edge Function, worker fallback stays open |
 
 ## 5. Decision log summary
 
@@ -113,6 +119,10 @@ Corrections requested on 2026-09-19: revision-bound authorization, parked jobs, 
 | registration-prefixes.ts final sign-off against ICAO Annex 7, secondary-source cross-check done 2026-09-19 | CKC | Phase 0 gate 4 |
 | Argentina LQ prefix, state aircraft, confirm with ANAC or drop | CKC | Phase 0 gate 4 |
 | Capture tab raised circle feasibility per platform | Engineering | Phase 1, cosmetic |
+| Supabase project provisioning, local stack or hosted, and who pays | CKC | Every Phase S exit gate, Phase 0 gate 1 |
+| Migration file naming, NNNN_name.sql underscore against the hyphens-only rule in AGENTS.md section 4. Supabase CLI parses version and name across an underscore | CKC | Phase S Block 2 sign-off |
+| updated_at maintenance on airframes, submissions and publish_jobs. Columns default to now() and nothing updates them. BuildPack section 3 specifies no trigger, so adding one is a schema change beyond section 3 | CKC | Phase S Block 4 |
+| BuildPack section 2.1 places BuildPack.md at the repo root while the doc set lives in docs/. Read as a stale line, not a ruling | CKC | Nothing today, doc hygiene |
 
 ## 7. Learnings, do not relearn
 
