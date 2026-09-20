@@ -17,13 +17,20 @@
     "test:watch": "vitest",
     "prefixes:generate": "tsx packages/shared/generate-prefix-migration.ts",
     "prefixes:check": "tsx scripts/check-prefix-drift.ts",
-    "verify": "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run prefixes:check && pnpm run test"
+    "verify": "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run prefixes:check && pnpm run test",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "test:live": "bash scripts/test-live.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/node": "^22.19.2",
+    "@types/pg": "^8.23.1",
     "eslint": "^9.39.1",
+    "pg": "^8.23.0",
     "prettier": "^3.6.2",
+    "supabase": "^2.117.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",

@@ -1,5 +1,65 @@
 # Change log
 
+## Phase S, Supabase unparked and migrations verified, 2026-09-20
+
+Applied the migration set to a real database for the first time. Three things
+came out of it: the set applies clean, one of my two predicted failures was
+wrong, and a security defect surfaced that no static test could have found.
+
+- Local stack on `supabase/postgres:17.6.1.167`. All ten migrations applied
+  clean from empty, twice, including a full container teardown and rebuild.
+- Both failures I predicted did not happen. `pg_cron` and `auth.users` were
+  both fine, because the image pre-installs all three extensions as
+  `supabase_admin`. Every `create extension if not exists` in 0001 is a no-op
+  on this image. Comment added so the next reader is not misled.
+- Grants verified against Postgres, not against the SQL text. `submissions`
+  exposes exactly 18 columns to `authenticated` and nothing to `anon`, `users`
+  exactly 6, `alert_events` exactly 6, and `sightings`, `media`,
+  `alert_deliveries`, `publish_jobs`, `moderation_actions` and
+  `import_conflicts` expose nothing.
+- Added `tests/policy/live-grants.test.ts`, 48 tests against Postgres as `anon`
+  and `authenticated`, and `tests/policy/live-rest.test.ts`, 17 tests against
+  PostgREST with a real anon key. Suite is now 160 tests, 65 of them live.
+- Added `pnpm run db:start`, `db:stop`, `db:reset` and `test:live`. Committed
+  `supabase/config.toml`, checked for secrets first, project id `planespotter`.
+
+Found and not fixed, needs a CKC decision:
+
+- **PostGIS is client writable.** The image grants `anon` INSERT, UPDATE,
+  DELETE and TRUNCATE on `public.spatial_ref_sys`, and PostgREST exposes
+  `public`. Reproduced over HTTP with only the publishable key: a PATCH
+  rewrote the WGS 84 definition and returned 204, a DELETE removed a row and
+  returned 204. Measured effect is real for `ST_Transform`, about 479 m of
+  error at Heathrow, and nil for the `geography` columns, which hardcode the
+  WGS 84 spheroid. `spatial_ref_sys` is also deletable, which would break every
+  transform. Full writeup, blast radius table and the three options in
+  `supabase/README.md`.
+- No migration can fix it. Migrations run as `postgres`, which is not a member
+  of `supabase_admin`, and Postgres silently ignores a revoke of another role's
+  grant. My first fix, a `revoke` in a migration `0011`, ran without error and
+  changed nothing. It was deleted rather than left in the tree looking like
+  protection. The defect is tracked by `it.fails` tests that flip the moment it
+  is fixed.
+
+Resolved by evidence, no longer open questions:
+
+- **Migration naming.** Verified rather than assumed. A file named
+  `0012-naming-probe.sql` was added and `supabase db reset` run. The CLI logged
+  no error, did not list it, and the table did not exist afterwards. A
+  hyphenated migration is silently skipped, which is worse than a failure.
+  Keep `NNNN_name.sql` and add an explicit carve-out to `AGENTS.md` section 4
+  at the next doc revision.
+- **`updated_at` maintenance.** Withdrawn as a CKC decision. `submissions` and
+  `publish_jobs` are written only by RPCs and workers we control, so they set
+  `updated_at` in their own statements in Block 4. No schema change and no
+  trigger. Only `airframes` is different, because Phase 0 importers write it in
+  bulk, so it moves to Phase 0.
+
+Still unpassed. Phase S exit gates remain 0 of 7. Nothing here is a gate; these
+are grant and schema checks, and the gates need hardware, a push chain, a
+benchmark and a cohort.
+
+
 ## Phase S, Blocks 1 and 2, 2026-09-20
 
 Monorepo scaffold and the Phase S schema subset. No database was created and no

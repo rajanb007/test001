@@ -6,5 +6,11 @@
     "types": ["node"],
     "noEmit": false
   },
-  "include": ["scripts/**/*.ts", "tests/**/*.ts", "vitest.config.ts", "eslint.config.mjs"]
+  "include": [
+    "scripts/**/*.ts",
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "eslint.config.mjs",
+    "packages/shared/registration-prefixes.json"
+  ]
 }
