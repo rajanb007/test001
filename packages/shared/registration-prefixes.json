@@ -1,0 +1,750 @@
+{
+ "version": "2.0",
+ "author": "CKC",
+ "date": "2026-09-19",
+ "source": "ICAO Annex 7. Cross-checked 2026-09-19 against secondary list citing FAA JO 7340.2 and national AIPs. Final Annex 7 sign-off pending Phase 0 gate 4.",
+ "rows": [
+  {
+   "prefix": "N",
+   "display": "N",
+   "country": "US",
+   "hyphen": false,
+   "pattern": "^N(?:[1-9][0-9]{0,4}|[1-9][0-9]{0,3}[A-HJ-NP-Z]|[1-9][0-9]{0,2}[A-HJ-NP-Z]{2})$"
+  },
+  {
+   "prefix": "C",
+   "display": "C",
+   "country": "CA",
+   "hyphen": true,
+   "pattern": "^C[FGI][A-Z]{3}$"
+  },
+  {
+   "prefix": "XA",
+   "display": "XA",
+   "country": "MX",
+   "hyphen": true,
+   "pattern": "^XA[A-Z]{3}$"
+  },
+  {
+   "prefix": "XB",
+   "display": "XB",
+   "country": "MX",
+   "hyphen": true,
+   "pattern": "^XB[A-Z]{3}$"
+  },
+  {
+   "prefix": "XC",
+   "display": "XC",
+   "country": "MX",
+   "hyphen": true,
+   "pattern": "^XC[A-Z]{3}$"
+  },
+  {
+   "prefix": "CU",
+   "display": "CU",
+   "country": "CU",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "HI",
+   "display": "HI",
+   "country": "DO",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "HH",
+   "display": "HH",
+   "country": "HT",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "6Y",
+   "display": "6Y",
+   "country": "JM",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "C6",
+   "display": "C6",
+   "country": "BS",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "VPC",
+   "display": "VP-C",
+   "country": "KY",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "8P",
+   "display": "8P",
+   "country": "BB",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "9Y",
+   "display": "9Y",
+   "country": "TT",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "HP",
+   "display": "HP",
+   "country": "PA",
+   "hyphen": true,
+   "pattern": "^HP[1-9][0-9]{3}[A-Z]{3}$"
+  },
+  {
+   "prefix": "TI",
+   "display": "TI",
+   "country": "CR",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "TG",
+   "display": "TG",
+   "country": "GT",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "HR",
+   "display": "HR",
+   "country": "HN",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "YS",
+   "display": "YS",
+   "country": "SV",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "PR",
+   "display": "PR",
+   "country": "BR",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "PP",
+   "display": "PP",
+   "country": "BR",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "PS",
+   "display": "PS",
+   "country": "BR",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "PT",
+   "display": "PT",
+   "country": "BR",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "PU",
+   "display": "PU",
+   "country": "BR",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "HK",
+   "display": "HK",
+   "country": "CO",
+   "hyphen": true,
+   "pattern": "^HK[1-9][0-9]{3}[A-Z]$"
+  },
+  {
+   "prefix": "HJ",
+   "display": "HJ",
+   "country": "CO",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "HC",
+   "display": "HC",
+   "country": "EC",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "OB",
+   "display": "OB",
+   "country": "PE",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "CC",
+   "display": "CC",
+   "country": "CL",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "LV",
+   "display": "LV",
+   "country": "AR",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "LQ",
+   "display": "LQ",
+   "country": "AR",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "YV",
+   "display": "YV",
+   "country": "VE",
+   "hyphen": false,
+   "pattern": null
+  },
+  {
+   "prefix": "CP",
+   "display": "CP",
+   "country": "BO",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "CX",
+   "display": "CX",
+   "country": "UY",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "ZP",
+   "display": "ZP",
+   "country": "PY",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "G",
+   "display": "G",
+   "country": "GB",
+   "hyphen": true,
+   "pattern": "^G[A-Z]{4}$"
+  },
+  {
+   "prefix": "D",
+   "display": "D",
+   "country": "DE",
+   "hyphen": true,
+   "pattern": "^D(?:[A-Z]{4}|[0-9]{4})$"
+  },
+  {
+   "prefix": "F",
+   "display": "F",
+   "country": "FR",
+   "hyphen": true,
+   "pattern": "^F[A-Z]{4}$"
+  },
+  {
+   "prefix": "EI",
+   "display": "EI",
+   "country": "IE",
+   "hyphen": true,
+   "pattern": "^EI[A-Z]{3}$"
+  },
+  {
+   "prefix": "EJ",
+   "display": "EJ",
+   "country": "IE",
+   "hyphen": true,
+   "pattern": "^EJ[A-Z]{3}$"
+  },
+  {
+   "prefix": "EC",
+   "display": "EC",
+   "country": "ES",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "I",
+   "display": "I",
+   "country": "IT",
+   "hyphen": true,
+   "pattern": "^I(?:[A-Z]{4}|[0-9A-Z][0-9]{3})$"
+  },
+  {
+   "prefix": "PH",
+   "display": "PH",
+   "country": "NL",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "OO",
+   "display": "OO",
+   "country": "BE",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "LX",
+   "display": "LX",
+   "country": "LU",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "HB",
+   "display": "HB",
+   "country": "CH",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "OE",
+   "display": "OE",
+   "country": "AT",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "OY",
+   "display": "OY",
+   "country": "DK",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "SE",
+   "display": "SE",
+   "country": "SE",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "LN",
+   "display": "LN",
+   "country": "NO",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "OH",
+   "display": "OH",
+   "country": "FI",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "TF",
+   "display": "TF",
+   "country": "IS",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "CS",
+   "display": "CS",
+   "country": "PT",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "SP",
+   "display": "SP",
+   "country": "PL",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "OK",
+   "display": "OK",
+   "country": "CZ",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "HA",
+   "display": "HA",
+   "country": "HU",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "YR",
+   "display": "YR",
+   "country": "RO",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "SX",
+   "display": "SX",
+   "country": "GR",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "TC",
+   "display": "TC",
+   "country": "TR",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "9H",
+   "display": "9H",
+   "country": "MT",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "ES",
+   "display": "ES",
+   "country": "EE",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "YL",
+   "display": "YL",
+   "country": "LV",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "LY",
+   "display": "LY",
+   "country": "LT",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "OM",
+   "display": "OM",
+   "country": "SK",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "UR",
+   "display": "UR",
+   "country": "UA",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "RA",
+   "display": "RA",
+   "country": "RU",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "M",
+   "display": "M",
+   "country": "IM",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "2",
+   "display": "2",
+   "country": "GG",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "A6",
+   "display": "A6",
+   "country": "AE",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "A7",
+   "display": "A7",
+   "country": "QA",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "A9C",
+   "display": "A9C",
+   "country": "BH",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "A4O",
+   "display": "A4O",
+   "country": "OM",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "HZ",
+   "display": "HZ",
+   "country": "SA",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "9K",
+   "display": "9K",
+   "country": "KW",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "4X",
+   "display": "4X",
+   "country": "IL",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "JY",
+   "display": "JY",
+   "country": "JO",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "OD",
+   "display": "OD",
+   "country": "LB",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "SU",
+   "display": "SU",
+   "country": "EG",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "ET",
+   "display": "ET",
+   "country": "ET",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "5Y",
+   "display": "5Y",
+   "country": "KE",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "ZS",
+   "display": "ZS",
+   "country": "ZA",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "CN",
+   "display": "CN",
+   "country": "MA",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "5N",
+   "display": "5N",
+   "country": "NG",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "9G",
+   "display": "9G",
+   "country": "GH",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "TS",
+   "display": "TS",
+   "country": "TN",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "7T",
+   "display": "7T",
+   "country": "DZ",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "JA",
+   "display": "JA",
+   "country": "JP",
+   "hyphen": false,
+   "pattern": "^JA[0-9A-Z]{4}$"
+  },
+  {
+   "prefix": "HL",
+   "display": "HL",
+   "country": "KR",
+   "hyphen": false,
+   "pattern": "^HL[0-9]{4}$"
+  },
+  {
+   "prefix": "B",
+   "display": "B",
+   "country": "CN",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "BH",
+   "display": "B-H",
+   "country": "HK",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "BK",
+   "display": "B-K",
+   "country": "HK",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "BL",
+   "display": "B-L",
+   "country": "HK",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "BM",
+   "display": "B-M",
+   "country": "MO",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "VT",
+   "display": "VT",
+   "country": "IN",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "AP",
+   "display": "AP",
+   "country": "PK",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "9V",
+   "display": "9V",
+   "country": "SG",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "9M",
+   "display": "9M",
+   "country": "MY",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "HS",
+   "display": "HS",
+   "country": "TH",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "VN",
+   "display": "VN",
+   "country": "VN",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "RP",
+   "display": "RP",
+   "country": "PH",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "PK",
+   "display": "PK",
+   "country": "ID",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "VH",
+   "display": "VH",
+   "country": "AU",
+   "hyphen": true,
+   "pattern": "^VH(?=[A-Z2-9]*[A-Z])[A-Z2-9]{3}$"
+  },
+  {
+   "prefix": "ZK",
+   "display": "ZK",
+   "country": "NZ",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "DQ",
+   "display": "DQ",
+   "country": "FJ",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "4R",
+   "display": "4R",
+   "country": "LK",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "S2",
+   "display": "S2",
+   "country": "BD",
+   "hyphen": true,
+   "pattern": null
+  },
+  {
+   "prefix": "9N",
+   "display": "9N",
+   "country": "NP",
+   "hyphen": true,
+   "pattern": null
+  }
+ ]
+}
