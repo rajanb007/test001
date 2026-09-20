@@ -17,12 +17,14 @@
     "test:watch": "vitest",
     "prefixes:generate": "tsx packages/shared/generate-prefix-migration.ts",
     "prefixes:check": "tsx scripts/check-prefix-drift.ts",
-    "verify": "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run prefixes:check && pnpm run test",
+    "verify": "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run prefixes:check && pnpm run tokens:check && pnpm run env:check && pnpm run test",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "test:live": "bash scripts/test-live.sh",
-    "tokens:generate": "tsx packages/shared/generate-tokens.ts"
+    "tokens:generate": "tsx packages/shared/generate-tokens.ts",
+    "tokens:check": "tsx scripts/check-token-drift.ts",
+    "env:check": "tsx scripts/check-no-env-files.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

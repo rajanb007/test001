@@ -1,5 +1,30 @@
 # Change log
 
+## Phase S, CI parity fix, 2026-09-20
+
+The Block 3 push turned CI red. Root cause and fix recorded because the class
+of mistake matters more than the line.
+
+- The Design token drift step was written as an inline `run: |` block using
+  `pnpm run tokens:generate > file`. `pnpm run` prints a banner to stdout, so
+  the redirect captured it and the diff always failed. Reproduced locally
+  before fixing.
+- The real fault was not the banner. The step lived only in the workflow, so
+  `pnpm run verify` did not cover it and there was no way to run it before
+  pushing. Every other check had been verified locally first; this one could
+  not be.
+- Both remaining inline steps are now scripts. `scripts/check-token-drift.ts`
+  and `scripts/check-no-env-files.ts`, wired as `tokens:check` and
+  `env:check`, both in `verify`. CI now runs exactly the seven commands
+  `verify` runs, in the same order.
+- `tests/ci-parity.test.ts` enforces it. Every `pnpm run` in the workflow must
+  exist in package.json and be covered by `verify`, no multi line `run:` block
+  is allowed, and no step may redirect `pnpm run` output to a file. That last
+  rule is the specific banner trap, written down so it cannot recur.
+- Verified `pnpm install --frozen-lockfile` succeeds, which CI does and local
+  installs do not.
+
+
 ## Phase S, Block 3, packages/shared, 2026-09-20
 
 Tokens, types, events and schemas. Suite is 453 tests, up from 160. Found one
