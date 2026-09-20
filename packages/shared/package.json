@@ -15,6 +15,7 @@
     "./schemas": "./schemas.ts",
     "./contrast": "./contrast.ts",
     "./registration-prefixes": "./registration-prefixes.ts",
-    "./publish/runner": "./publish/runner.ts"
+    "./publish/runner": "./publish/runner.ts",
+    "./publish/supabase-storage": "./publish/supabase-storage.ts"
   }
 }

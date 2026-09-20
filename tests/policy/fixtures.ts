@@ -61,6 +61,19 @@ export async function resetData(): Promise<void> {
   `);
 }
 
+let handleSeq = 0;
+
+/**
+ * A handle guaranteed to satisfy the users_handle_check constraint:
+ * lowercase, starts alphanumeric, three to thirty characters. Fixtures that
+ * built handles by hand produced two character ones and hit the constraint.
+ */
+export function uniqueHandle(prefix: string): string {
+  handleSeq += 1;
+  const stem = prefix.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return `${stem || 'user'}-${String(handleSeq).padStart(4, '0')}`;
+}
+
 /** Creates an auth user and its public profile. */
 export async function createUser(
   handle: string,

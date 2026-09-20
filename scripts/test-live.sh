@@ -16,6 +16,7 @@ eval "$(printf '%s\n' "$status" | sed 's/^/export /')"
 export DATABASE_URL="$DB_URL"
 export SUPABASE_URL="$API_URL"
 export SUPABASE_ANON_KEY="$ANON_KEY"
+export SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
 # The stack is on loopback; a proxy in the environment must not intercept it.
 export NO_PROXY="127.0.0.1,localhost"
 export no_proxy="$NO_PROXY"

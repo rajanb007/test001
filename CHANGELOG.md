@@ -1,5 +1,74 @@
 # Change log
 
+## Phase S, Block 5, storage and the push chain, 2026-09-20
+
+Real storage buckets, the real storage adapter, and the alert fanout from the
+sightings trigger through to receipts. Suite is 588 tests, 167 of them live,
+up from 552.
+
+**Gate 7 now runs against real objects in a real bucket.** It was previously
+proved only against a fake port.
+
+- Migration 0016 creates the three buckets from BuildPack section 4 rule 3:
+  `originals` private and owner scoped by path, `pending` with no client policy
+  at all, `derivatives` public read. `SupabaseStorage` implements the same
+  `StoragePort` the fake did, so the runner did not change.
+- Gate 7 rerun on real storage: the happy path writes three real objects that
+  are fetchable at their public URL, a kill after copied then restart yields
+  exactly one sighting, three objects and one publish audit row, and a kill
+  after committed writes nothing and leaves the objects untouched. A public key
+  returns 400 before commit, R13.
+- Migration 0017 adds the `after insert on sightings` trigger. It enqueues one
+  `alert_events` row per follower with `on conflict do nothing`, so invariant 7
+  is the unique index rather than a lookup. Freshness and provenance are
+  separate and both tested: a `taken_at` older than seven days publishes and
+  alerts nobody, R6, and an archive publication alerts nobody, invariant 5. An
+  onboarding follow fans out exactly like a deliberate one, A11.
+- Migration 0018 implements section 6.2 with its claim and recovery statements
+  reproduced exactly as specified. Normal fanout claims pending only and never
+  reclaims an expired sending row. Ticket and error writes are fenced by
+  `send_attempt_id`, so a late response from a superseded attempt returns false
+  and changes nothing. Recovery allows exactly one retry, refuses before ten
+  minutes, and a second uncertain outcome becomes `ticket_lost`.
+- `register_push_token`, `toggle_follow`, `mark_alert_opened` and
+  `mark_alert_attributed`. Attribution is a separate stamp from the open, so
+  the North Star denominator stays provider-accepted alert events, R9.
+- R9 is asserted structurally: no label in `delivery_status` or
+  `alert_event_status` contains the word delivered.
+- Mutation tested. Removing the `retry_count = 0` and age guards from
+  `recover_delivery` fails three tests, including the four-way concurrent
+  recovery race.
+
+Two test-quality fixes:
+
+- One enqueue test asserted only that a sighting id was truthy, which proved
+  nothing. Replaced with a check of the alert row's airframe, sighting, status
+  and day bucket.
+- The migration-list test pinned exact filenames and had needed hand editing on
+  every migration for three blocks running. Rewritten to assert the structural
+  properties that matter, sequential numbering with no gaps or duplicates and
+  the nine schema concerns in dependency order.
+
+Gates:
+
+- **Gate 7 passes on real storage.** It still has to be rerun against the
+  completed Phase 0 pipeline before sign-off, BuildPack section 9.
+- **Gate 3 is not closed.** The chain is exercised end to end in SQL: event
+  created, delivery claimed, ticket recorded, receipt to `provider_accepted`,
+  opened, attributed. The one hop no test here can supply is the real Expo
+  send to APNs or FCM on a physical device.
+- Gates 1, 4, 5 and 6 are untouched by this block. Phase S exit gates remain
+  0 of 7 passed.
+
+Not built, and why:
+
+- No `process-media`. Deriving three variants from a 24 MP JPEG or HEIC is the
+  gate 5 decision, and the benchmark only means something inside the real Edge
+  runtime with its 256 MB and 2 second limits.
+- No Expo app, so no capture slice, no SQLite queue and no TUS upload. Gate 1
+  is about termination, restart and network loss on hardware.
+
+
 ## Phase S, Block 4, write path and publication, 2026-09-20
 
 `create_submission`, the guarded transition helper, `advance_submission`,

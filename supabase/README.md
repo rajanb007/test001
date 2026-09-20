@@ -66,8 +66,12 @@ distinguishable from a real one forever.
   Phase S task list, so the reopen path does not exist yet.
 - No `get_my_submissions`. The owner projection exists as
   `app_owner_submission_json` and the RPC that wraps it is Phase 0.
-- No Edge Functions. `process-media` lands in Block 5 and is scaffolded as an
-  Edge Function; the worker fallback stays open until the gate 5 benchmark.
+- No Edge Functions yet. The cron bodies for `alert-fanout`, `receipt-check`,
+  `sweeper` and `publish-runner` are thin loops over the RPCs in `0014` and
+  `0018`; `process-media` needs the image pipeline and the gate 5 benchmark.
+- No `process-media`. Deriving three variants from a 24 MP JPEG or HEIC is the
+  gate 5 decision, and the benchmark has to run in the real Edge runtime with
+  its 256 MB and 2 second limits, not here.
 
 ## Applying
 

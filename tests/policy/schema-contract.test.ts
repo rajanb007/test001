@@ -22,24 +22,34 @@ describe('migration file set', () => {
     }
   });
 
-  it('splits by concern per AGENTS.md section 7', () => {
-    expect(files).toEqual([
-      '0001_extensions.sql',
-      '0002_enums.sql',
-      '0003_identity.sql',
-      '0004_content.sql',
-      '0005_social.sql',
-      '0006_safety.sql',
-      '0007_indexes.sql',
-      '0008_rls.sql',
-      '0009_grants.sql',
-      '0010_registration_prefixes_seed.sql',
-      '0011_submission_transitions.sql',
-      '0012_rpc_create_submission.sql',
-      '0013_rpc_resolve_airframe.sql',
-      '0014_rpc_publish_submission.sql',
-      '0015_phase_s_fixture_harness.sql',
+  it('numbers are sequential from 0001 with no gaps or duplicates', () => {
+    // Structural rather than a hardcoded list. An earlier version pinned the
+    // exact filenames and had to be hand edited on every migration, which made
+    // it a chore rather than a check. Gaps and duplicates are the real risks:
+    // both break `supabase db reset` ordering or silently skip a file.
+    const numbers = files.map((f) => Number(f.slice(0, 4)));
+    expect(numbers).toEqual(numbers.map((_, index) => index + 1));
+  });
+
+  it('splits the schema by concern per AGENTS.md section 7, in dependency order', () => {
+    const concerns = files.slice(0, 9).map((f) => f.slice(5, -4));
+    expect(concerns).toEqual([
+      'extensions',
+      'enums',
+      'identity',
+      'content',
+      'social',
+      'safety',
+      'indexes',
+      'rls',
+      'grants',
     ]);
+  });
+
+  it('every migration past the schema split names what it adds', () => {
+    for (const file of files.slice(9)) {
+      expect(file.slice(5, -4).length).toBeGreaterThan(3);
+    }
   });
 });
 

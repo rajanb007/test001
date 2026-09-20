@@ -45,16 +45,17 @@ Conflict order. BuildPack, then MVP v1.3.2 on scope, then DESIGN.md on visuals, 
 
 | Item | State |
 |---|---|
-| Phase | Phase S, Blocks 1 to 4 of 6 done. Monorepo, schema subset, packages/shared, write path and publication |
+| Phase | Phase S, Blocks 1 to 5 of 6 partly done. Server side complete through storage and the push chain; the device half of Block 5 needs hardware |
 | Current doc set | BuildPack v1.8, MVP v1.3.2, DesignSpec v1.0, repo doc set v2.5; corrections requested by user on 2026-09-19 |
 | Pending doc revision | None for the requested correction set. Static package checks recorded in docs/VALIDATION.md; implementation and phase gates remain unpassed |
 | Token freeze | Frozen at DESIGN.md v1.0, ruling D1. tokens.ts generated from section 2.4, CI fails on drift. All 62 documented ratios recomputed, one defect found in the dark error row, see section 6 |
-| Phase S exit gates | 0 of 7 passed. Gate 2 identity and concurrency pass live; gate 7 passes against a fake storage port and is not closed until Block 5 runs it on a real bucket. Gates 1, 3, 4, 5, 6 need hardware, push, a benchmark and a cohort |
+| Phase S exit gates | 0 of 7 passed. Gate 2 identity and concurrency pass live. Gate 7 passes against real Supabase Storage, still needs a rerun on the completed Phase 0 pipeline. Gate 3 is exercised end to end in SQL but needs one real Expo push on a device. Gates 1, 4, 5, 6 need hardware, a NativeTabs spike, a benchmark in the real Edge runtime, and a cohort |
 | Repo | pnpm workspaces. apps/mobile and apps/web still empty manifests. packages/shared holds tokens, contrast, types, events, schemas and the registration validator. CI runs format, lint, typecheck, prefix drift, token drift and tests |
-| Migrations | 0001 to 0015. Tables, RLS, grants, then the transition helper, create_submission, resolve_airframe, the publication stage machine and the Phase S fixture harness. Applied clean from empty repeatedly |
-| Verification | 552 tests, 419 static plus 133 live. Live layer runs as anon and authenticated against Postgres and against PostgREST with a real anon key. Grants verified against the engine, not the SQL text. CI runs the static layer only, the live layer skips without a stack |
+| Migrations | 0001 to 0018. Tables, RLS, grants, then the transition helper, create_submission, resolve_airframe, the publication stage machine and the Phase S fixture harness. Applied clean from empty repeatedly |
+| Verification | 588 tests, 421 static plus 167 live. Live layer runs as anon and authenticated against Postgres and against PostgREST with a real anon key. Grants verified against the engine, not the SQL text. CI runs the static layer only, the live layer skips without a stack |
 | Supabase | Unparked 2026-09-20, local Docker stack, zero cost. No hosted project provisioned. pnpm run db:start, db:reset, test:live |
 | Branches | main, phase-s, feature branches off phase-s per AGENTS.md section 6. Default branch and protection not yet set in GitHub settings |
+| Storage | originals and pending private, derivatives public read. Buckets and policies in migration 0016, exercised by live tests against real objects |
 | Fixture harness | Phase S only, migration 0015. Confined to app_fixture_ names, service-role only, audit rows tagged fixture true. Phase 0 deletes it and adds authorize_submission |
 | Open defect | DESIGN.md section 2.1 dark error row prints three wrong ratios. Hex is safe, all pairings pass, printed values understate. See packages/shared/README.md |
 | Open defect | PostGIS is client writable. anon holds INSERT, UPDATE, DELETE and TRUNCATE on public.spatial_ref_sys through the image's own grants, reachable over REST with the publishable key. Reproduced over HTTP. No migration can fix it. See supabase/README.md |
