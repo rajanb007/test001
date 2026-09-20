@@ -83,11 +83,57 @@ describe('publish job stages match the SQL check constraint', () => {
   });
 });
 
+/**
+ * The labels docs/DESIGN.md section 6 prints, read from the table itself.
+ *
+ * An earlier version of this block compared QUEUE_STATE_LABELS against
+ * LOCAL_QUEUE_STATES, which are both written here, so it compared the
+ * implementation to itself and passed while a state was missing. The source is
+ * the document, so the document is what these read.
+ */
+function designLabels(): string[] {
+  const design = readFileSync(join(migrations, '..', '..', 'docs', 'DESIGN.md'), 'utf8');
+  const section = design.slice(design.indexOf('## 6. Queue state labels'), design.indexOf('## 7.'));
+  return (
+    [...section.matchAll(/^\|[^|]+\|[^|]+\|([^|]+)\|/gm)]
+      .map((m) => (m[1] as string).trim())
+      // Drop the header row and the markdown separator row.
+      .filter((label) => label.length > 0 && label !== 'Label' && !/^-+$/.test(label))
+  );
+}
+
 describe('queue labels', () => {
-  it('cover every submission state plus the two local-only substates', () => {
+  it('covers every submission state plus every local-only substate we declare', () => {
     expect(Object.keys(QUEUE_STATE_LABELS).sort()).toEqual(
       [...SUBMISSION_STATES, ...LOCAL_QUEUE_STATES].sort(),
     );
+  });
+
+  it('invents no label, every one appears in docs/DESIGN.md section 6', () => {
+    const fromDoc = designLabels();
+    for (const label of Object.values(QUEUE_STATE_LABELS)) {
+      expect(fromDoc).toContain(label);
+    }
+  });
+
+  it.fails('carries every label docs/DESIGN.md section 6 prints', () => {
+    // Known divergence, open for CKC. Section 6 lists three local-only states
+    // and BuildPack section 7.3 lists two, "Saved on this device and Waiting
+    // for connection". types.ts followed the BuildPack, which wins conflicts
+    // per CLAUDE.md section 3, so `local failed` -> "Couldn't upload" is
+    // absent. A queue with no state for a failed upload cannot satisfy
+    // invariant 11, "offline is durable and honestly reported", so the
+    // recommendation is to add it. This flips the moment one doc is revised.
+    const declared = Object.values(QUEUE_STATE_LABELS);
+    for (const label of designLabels()) {
+      expect(declared).toContain(label);
+    }
+  });
+
+  it('names the one label that is missing, so the gap stays specific', () => {
+    const declared: string[] = Object.values(QUEUE_STATE_LABELS);
+    const missing = designLabels().filter((label) => !declared.includes(label));
+    expect(missing).toEqual(["Couldn't upload"]);
   });
 
   it('are sentence case with no exclamation marks, binding rule 7.2.8', () => {

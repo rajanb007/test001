@@ -1,5 +1,62 @@
 # Change log
 
+## Phase S, UI mocks and three scope rulings, 2026-09-20
+
+Phase S task 8 is done, and reading the spec to build it found a gap in
+shipped code.
+
+- Four artboards on a Design canvas: Home feed, Aircraft Passport, Capture
+  step 2 of 4, and Queue. Built from docs/DESIGN.md section 5 component
+  anatomy and section 6 queue labels, with the D1 frozen tokens. That closes
+  "Static card mock, Passport above-the-fold mock with history strip,
+  clickable capture plus follow prototype", BuildPack section 9.
+- Every design point was verified against the published bytes rather than
+  asserted: 26 wireframe directives from CKC, plus 6 corrections forced by
+  rules the wireframes did not account for, chiefly that an artboard cannot
+  reach the network, that a fixed card aspect defeats "height flexes, no
+  letterbox", and that a div with cursor:pointer is unreachable by keyboard.
+
+Found while building the Queue screen, open for CKC:
+
+- **The queue has no state for a failed upload.** docs/DESIGN.md section 6
+  lists three local-only states and BuildPack section 7.3 lists two.
+  packages/shared/types.ts followed the BuildPack, which wins conflicts, so
+  `local failed` with the label "Couldn't upload" is absent. Invariant 11
+  requires offline to be "durable and honestly reported", and a queue that
+  cannot say an upload failed does not meet that. Recommendation is to add
+  the third state; the conflict needs a doc revision either way.
+- **The test that should have caught it compared the code to itself.**
+  `types.test.ts` asserted QUEUE_STATE_LABELS against LOCAL_QUEUE_STATES,
+  both written in the same file. Rewritten to parse the section 6 table from
+  docs/DESIGN.md: one test proves no label is invented, an it.fails test
+  documents the missing one, and a third names it so the gap stays specific.
+
+Three scope rulings from CKC, 2026-09-20:
+
+- **Vicinity alerts, sequenced not merged.** An alert for any aircraft near
+  the user would contaminate the North Star denominator, which counts
+  alert_events with status provider_accepted, one per user per airframe per
+  day. Invariant 7 keys the rate limit on (user_id, airframe_id, window_key)
+  and a vicinity alert has no followed airframe. More importantly a user who
+  returns because a jet is overhead cannot be distinguished from one who
+  returns because the airframe they follow was seen again, which is the only
+  question Phase S exists to answer. Kept as a post-validation experiment
+  with its own metric.
+- **Comments, likes, follow-user, badges and scores stay deferred.** MVP
+  v1.3.2 section 5 defers comments and follow-user "to reduce product and
+  moderation surface", and the Founder Operations section names those
+  deferrals plus one alert type as the mitigations for one founder owning
+  engineering, moderation, imports and activation. Removing the mitigation
+  leaves the risk.
+- **Queue screen built.** Largely in scope already through QueueStateBadge
+  and get_my_submissions. Titled Queue, not Upload Queue, since "upload" is
+  banned as a noun; registrations render as plain mono rather than
+  RegistrationChip because the chip promises a Passport link that a queued
+  item does not have until publish.
+
+No code behaviour changed. Phase S exit gates remain 0 of 7.
+
+
 ## Phase S, code review of Blocks 1 to 5, 2026-09-20
 
 Ten defects found and fixed, each with a regression test that fails without
