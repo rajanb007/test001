@@ -1,5 +1,24 @@
 # Change log
 
+## Phase S, second code review, 2026-09-21
+
+Blocks 1 to 5 reviewed again after the mock work. Eight findings, none
+fixed yet, all recorded so nothing is relearned.
+
+- Five findings reproduce as live tests marked `it.fails` in
+  tests/policy/live-review2-regressions.test.ts. Each asserts the correct
+  behaviour, so a fix flips the marker off and leaves a regression. A parked
+  publish job is re-claimed every tick, re-approval keeps the first
+  revision, an alert event with zero deliveries stays pending forever,
+  app_lock_identity raises on an empty key set, and publish_resolve accepts
+  a verified job and regresses its stage.
+- Two are confirmed by reading. reconcile_alert_event counts without a lock
+  and writes unconditionally, and generate-tokens.ts line 23 replaces a
+  string with itself.
+- One needs a product ruling. publish_commit copies captured_geo into
+  display_geo, which makes the private coordinate the public one. No doc
+  defines the derivation. Tracked in CLAUDE.md section 6.
+
 ## Phase S, UI mocks and three scope rulings, 2026-09-20
 
 Phase S task 8 is done, and reading the spec to build it found a gap in
