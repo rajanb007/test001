@@ -39,8 +39,42 @@ begin
     and not exists (
       select 1 from public.users u where u.id = e.user_id and u.anonymized_at is not null
     )
+    -- Rows that already exist are excluded before the limit, not after. The
+    -- limit applies to the selected rows and on conflict discards them
+    -- afterwards, so without this a backlog past p_limit re-selected the same
+    -- materialised rows every tick and never drained. on conflict stays as
+    -- the guard against two ticks racing on the same row.
+    and not exists (
+      select 1 from public.alert_deliveries d
+      where d.alert_event_id = e.id and d.token = t.token
+    )
+  order by e.created_at, t.token
   limit p_limit
   on conflict (alert_event_id, token) do nothing;
+
+  -- An event with nothing to deliver is closed here, not left pending forever.
+  -- Section 6.2 step 6, no token events are skipped. The test is the insert's
+  -- own eligibility, negated, not "zero rows", because the insert is limited
+  -- and a backlog past p_limit also has zero rows for now. An event is closed
+  -- only when no granted token exists, the sighting is not published, or the
+  -- user is anonymized. reconcile_alert_event lands it on skipped.
+  perform public.reconcile_alert_event(e.id)
+  from public.alert_events e
+  join public.sightings s on s.id = e.sighting_id
+  where e.status = 'pending'
+    and not exists (
+      select 1 from public.alert_deliveries d where d.alert_event_id = e.id
+    )
+    and (
+      s.status <> 'published'
+      or exists (
+        select 1 from public.users u where u.id = e.user_id and u.anonymized_at is not null
+      )
+      or not exists (
+        select 1 from public.device_push_tokens t
+        where t.user_id = e.user_id and t.permission_state = 'granted'
+      )
+    );
 
   return query
   select d.id
@@ -278,7 +312,13 @@ declare
   v_next alert_event_status;
   v_current alert_event_status;
 begin
-  select status into v_current from public.alert_events where id = p_alert_event_id;
+  -- Row lock first. Two reconcilers, a receipt and a sweeper tick, otherwise
+  -- both count, then both write, and the later write can demote an event the
+  -- earlier one just accepted. Deliveries are always written before this
+  -- call, so the lock order is deliveries then events everywhere.
+  select status into v_current from public.alert_events
+  where id = p_alert_event_id
+  for update;
 
   -- Accepted is terminal for the event. Nothing demotes it.
   if v_current = 'provider_accepted' then
@@ -307,7 +347,10 @@ begin
     v_next := 'skipped';
   end if;
 
-  update public.alert_events set status = v_next where id = p_alert_event_id;
+  -- Belt and braces under the lock, accepted never regresses.
+  update public.alert_events
+  set status = v_next
+  where id = p_alert_event_id and status <> 'provider_accepted';
   return v_next;
 end;
 $$;

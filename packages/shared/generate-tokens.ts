@@ -20,7 +20,7 @@ if (fence === null || fence[1] === undefined) {
   throw new Error('docs/DESIGN.md section 2.4 has no ts code fence');
 }
 
-const body = fence[1].trimEnd().replace(/^export const /gm, 'export const ');
+const body = fence[1].trimEnd();
 
 process.stdout.write(
   `/**

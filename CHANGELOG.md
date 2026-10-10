@@ -1,5 +1,37 @@
 # Change log
 
+## Phase S, second review fixes, 2026-10-10
+
+All eight findings from the 2026-09-21 review fixed, plus one more the new
+tests found. Every fix has a live regression in
+tests/policy/live-review2-regressions.test.ts, eight tests, all plain `it`
+now. 632 tests pass static and live.
+
+- publish_claim claims only submissions in processing or awaiting_review,
+  the same two states commit requires, BuildPack 5.5. A job parked to
+  awaiting_identification or quarantined keeps its approval and was
+  re-claimed every tick.
+- publish_claim stamps submission_revision with approved_revision on every
+  claim, BuildPack 5.5 claimed row. The coalesce kept the first revision,
+  so a park, edit and re-approve could never commit.
+- publish_resolve requires stage claimed. A valid lease could re-resolve a
+  verified job and regress its stage with the manifest already committed.
+- app_lock_identity returns on an empty key set instead of raising from
+  foreach over a null array.
+- publish_commit writes display_geo null. CKC ruled null for Phase S, the
+  Phase 0 derivation rule stays open in CLAUDE.md section 6.
+- reconcile_alert_event locks the alert_events row before counting and the
+  final update never overwrites provider_accepted. Lock order is deliveries
+  then events on every path.
+- materialize_deliveries closes a pending event that has no granted token,
+  an unpublished sighting or an anonymized user. The test is the insert's
+  eligibility negated, not "zero rows", because the insert is limited.
+- Found by that test, pre-existing. The insert applied its limit before
+  on conflict discarded the duplicates, so a backlog past the limit
+  re-selected the same rows every tick and never drained. Existing rows are
+  now excluded before the limit and candidates are ordered oldest first.
+- generate-tokens.ts dropped a replace that replaced a string with itself.
+
 ## Phase S, second code review, 2026-09-21
 
 Blocks 1 to 5 reviewed again after the mock work. Eight findings, none

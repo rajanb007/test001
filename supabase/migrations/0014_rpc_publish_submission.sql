@@ -56,6 +56,12 @@ begin
     v_keys := v_keys || hashtext('registration:' || p_registration_id::text)::bigint;
   end if;
 
+  -- No identity, nothing to lock. array_agg over an empty set returns null
+  -- and foreach raises on null, so an unresolved job must return here.
+  if cardinality(v_keys) = 0 then
+    return;
+  end if;
+
   -- Ascending signed numeric order, distinct keys only.
   foreach v_key in array (select array_agg(k order by k) from unnest(v_keys) k)
   loop
@@ -138,7 +144,10 @@ begin
       lease_token = v_token,
       lease_until = now() + make_interval(secs => p_lease_seconds),
       attempts = j.attempts + 1,
-      submission_revision = coalesce(j.submission_revision, s.content_revision),
+      -- The authorized revision, stamped on every claim, section 5.5 claimed
+      -- row. A job parked and re-approved on a later revision must carry that
+      -- revision, not the one it was first claimed with.
+      submission_revision = s.approved_revision,
       updated_at = now()
   from public.submissions s
   where j.id = (
@@ -148,6 +157,10 @@ begin
     where s2.approved_revision is not null
       and s2.approved_revision = s2.content_revision
       and s2.approved_at is not null
+      -- Only a publishable state is claimable, the same two states commit
+      -- requires, section 5.5 verified row. A park to awaiting_identification
+      -- or quarantined keeps its approval, so approval alone is not enough.
+      and s2.state in ('processing', 'awaiting_review')
       and (
             j2.stage = 'waiting_authorization'
          or (
@@ -201,6 +214,14 @@ begin
 
   if v_job.id is null then
     raise exception 'stale or expired lease for job %', p_job_id using errcode = '55P03';
+  end if;
+
+  -- Resolve runs once per generation, from claimed only. A holder of a valid
+  -- lease must not re-resolve a job whose manifest is already committed and
+  -- whose objects may already be copied, that would regress the stage.
+  if v_job.stage <> 'claimed' then
+    raise exception 'job % is at stage %, resolve requires claimed', p_job_id, v_job.stage
+      using errcode = '55000';
   end if;
 
   select * into v_sub from public.submissions where id = v_job.submission_id;
@@ -388,7 +409,10 @@ begin
   )
   values (
     v_sub.id, v_job.resolved_airframe_id, v_job.resolved_registration_id, v_sub.user_id,
-    v_sub.airport_icao, v_sub.captured_geo, v_sub.captured_geo, v_sub.taken_at,
+    -- display_geo stays null. captured_geo is private and no document defines
+    -- how the public point derives from it, so copying it verbatim would
+    -- publish the private value, invariant 6. CKC ruled null for Phase S.
+    v_sub.airport_icao, v_sub.captured_geo, null, v_sub.taken_at,
     v_sub.caption, v_sub.caption_hidden, v_sub.ingestion_source, v_sub.contribution_batch_id
   )
   returning id into v_sighting_id;
